@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Config {
@@ -13,7 +14,9 @@ class Config {
       return 'https://afritrade-connect-api.onrender.com';
     }
 
-    if (Platform.isAndroid) {
+    if (kIsWeb) {
+      return 'http://127.0.0.1:3000'; // Développement sur le web
+    } else if (Platform.isAndroid) {
       return 'http://10.0.2.2:3000'; // Android Emulator
     } else if (Platform.isIOS) {
       return 'http://localhost:3000'; // iOS Simulator
