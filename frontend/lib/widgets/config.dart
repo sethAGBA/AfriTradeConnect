@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class Config {
   static const bool isProduction = bool.fromEnvironment('dart.vm.product');
@@ -8,7 +10,48 @@ class Config {
   static String? _jwtToken;
   static String? get jwtToken => _jwtToken;
   static set jwtToken(String? value) => _jwtToken = value;
+  
+static Future<bool> isOffline() async {
+    try {
+      final result = await InternetAddress.lookup('google.com').timeout(Duration(seconds: 5));
+      return result.isEmpty || result[0].rawAddress.isEmpty;
+    } catch (_) {
+      return true;
+    }
+  }
 
+  static Future<void> init() async {
+    try {
+      await loadToken();
+      
+      // Vérifier la connexion internet
+      final isNetworkAvailable = !(await isOffline());
+      
+      if (!isNetworkAvailable) {
+        throw Exception('Pas de connexion Internet');
+      }
+
+      // Vérifier la validité du token
+      if (_jwtToken != null) {
+        final response = await http.get(
+          Uri.parse('$baseUrl/verify-token'),
+          headers: authHeaders,
+        ).timeout(timeoutDuration);
+
+        if (response.statusCode != 200) {
+          await removeToken();
+          throw Exception('Session expirée');
+        }
+      }
+    } catch (e) {
+      debugPrint('Erreur d\'initialisation: $e');
+      // Réinitialiser le token en cas d'erreur
+      await removeToken();
+      rethrow;
+    }
+  }
+
+  // ...
   static String get baseUrl {
     if (isProduction) {
       return 'https://afritrade-connect-api.onrender.com';

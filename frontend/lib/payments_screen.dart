@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:frontend/home_screen.dart';
-import 'package:frontend/logistics_screen.dart';
-import 'package:frontend/profile_screen.dart';
 
 class PaymentsScreen extends StatelessWidget {
   // Couleurs personnalisées
@@ -17,28 +14,7 @@ class PaymentsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: Text(
-          'Paiements',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            fontSize: 20,
-          ),
-        ),
-        backgroundColor: primaryColor,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications_none, color: Colors.white),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.search, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
-      ),
+      appBar: _buildAppBar(),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -55,12 +31,35 @@ class PaymentsScreen extends StatelessWidget {
                   _buildTransactionsSection(),
                 ],
               ),
-              
             ),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavBar(context),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: Text(
+        'Paiements',
+        style: GoogleFonts.poppins(
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          fontSize: 20,
+        ),
+      ),
+      backgroundColor: primaryColor,
+      elevation: 0,
+      actions: [
+        IconButton(
+          icon: Icon(Icons.notifications_none, color: Colors.white),
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: Icon(Icons.search, color: Colors.white),
+          onPressed: () {},
+        ),
+      ],
     );
   }
 
@@ -82,14 +81,13 @@ class PaymentsScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-        width: double.infinity,
-        alignment: Alignment.center,
-        padding: EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(12),
-        ),
-      
+            width: double.infinity,
+            alignment: Alignment.center,
+            padding: EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Text(
               'Votre portefeuille',
               style: GoogleFonts.poppins(
@@ -102,7 +100,7 @@ class PaymentsScreen extends StatelessWidget {
           SizedBox(height: 24),
           Text(
             'Gérez vos transactions en toute sécurité',
-            style: TextStyle(
+            style: GoogleFonts.poppins(
               color: Colors.white.withOpacity(0.8),
               fontSize: 14,
             ),
@@ -115,9 +113,7 @@ class PaymentsScreen extends StatelessWidget {
   Widget _buildCreditScoreCard() {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -194,14 +190,14 @@ class PaymentsScreen extends StatelessWidget {
         SizedBox(width: 8),
         Text(
           '$label: ',
-          style: TextStyle(
+          style: GoogleFonts.poppins(
             color: Colors.grey[600],
             fontSize: 14,
           ),
         ),
         Text(
           value,
-          style: TextStyle(
+          style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: textColor,
           ),
@@ -213,9 +209,7 @@ class PaymentsScreen extends StatelessWidget {
   Widget _buildWalletSection() {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -229,7 +223,7 @@ class PaymentsScreen extends StatelessWidget {
                   children: [
                     Text(
                       'Solde disponible',
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         color: Colors.grey[600],
                         fontSize: 14,
                       ),
@@ -253,7 +247,7 @@ class PaymentsScreen extends StatelessWidget {
                   ),
                   child: Text(
                     'Actif',
-                    style: TextStyle(
+                    style: GoogleFonts.poppins(
                       color: successColor,
                       fontWeight: FontWeight.bold,
                     ),
@@ -268,13 +262,14 @@ class PaymentsScreen extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: () {},
                     icon: Icon(Icons.add, color: Colors.white),
-                    label: Text('Ajouter des fonds', style: TextStyle( color: Colors.white) ),
+                    label: Text(
+                      'Ajouter des fonds',
+                      style: GoogleFonts.poppins(color: Colors.white),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
                       padding: EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                   ),
                 ),
@@ -282,15 +277,15 @@ class PaymentsScreen extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {},
-                    icon: Icon(Icons.send),
-                    label: Text('Envoyer'),
+                    icon: Icon(Icons.send, color: primaryColor),
+                    label: Text(
+                      'Envoyer',
+                      style: GoogleFonts.poppins(color: primaryColor),
+                    ),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: primaryColor,
                       side: BorderSide(color: primaryColor),
                       padding: EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                   ),
                 ),
@@ -334,18 +329,10 @@ class PaymentsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionCard(
-    String title,
-    String subtitle,
-    String amount,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _buildTransactionCard(String title, String subtitle, String amount, IconData icon, Color color) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: Container(
           padding: EdgeInsets.all(8),
@@ -357,61 +344,26 @@ class PaymentsScreen extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: TextStyle(
+          style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: textColor,
           ),
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(
+          style: GoogleFonts.poppins(
             color: Colors.grey[600],
             fontSize: 12,
           ),
         ),
         trailing: Text(
           amount,
-          style: TextStyle(
+          style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: color,
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildBottomNavBar(BuildContext context) {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      selectedItemColor: primaryColor,
-      unselectedItemColor: Colors.grey[600],
-      currentIndex: 2,
-      elevation: 8,
-      items: [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
-        BottomNavigationBarItem(icon: Icon(Icons.local_shipping), label: 'Logistique'),
-        BottomNavigationBarItem(icon: Icon(Icons.payment), label: 'Paiements'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-      ],
-      onTap: (index) {
-        if (index == 0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomeScreen()),
-          );
-        } else if (index == 1) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => LogisticsScreen()),
-          );
-        } else if (index == 3) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => ProfileScreen()),
-          );
-        }
-      },
     );
   }
 }

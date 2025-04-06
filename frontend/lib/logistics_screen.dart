@@ -1,10 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
-import 'package:frontend/payments_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:frontend/home_screen.dart';
-import 'package:frontend/profile_screen.dart';
 
 class LogisticsScreen extends StatefulWidget {
   @override
@@ -24,7 +21,7 @@ class _LogisticsScreenState extends State<LogisticsScreen> {
   void initState() {
     super.initState();
     controller = MapController(
-      initPosition: GeoPoint(latitude: 6.5244, longitude: 3.3792),
+      initPosition: GeoPoint(latitude: 6.5244, longitude: 3.3792), // Lagos, Nigeria
       areaLimit: BoundingBox(
         east: 30.0,
         north: 15.0,
@@ -53,7 +50,6 @@ class _LogisticsScreenState extends State<LogisticsScreen> {
           _buildFreightCard(),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
@@ -82,80 +78,71 @@ class _LogisticsScreenState extends State<LogisticsScreen> {
   }
 
   Widget _buildShipmentHeader() {
-   
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [primaryColor, accentColor],
-      ),
-      borderRadius: BorderRadius.only(
-        bottomLeft: Radius.circular(24),
-        bottomRight: Radius.circular(24),
-      ),
-      boxShadow: [
-        BoxShadow(
-        color: Colors.black.withOpacity(0.2),
-        blurRadius: 10,
-        offset: Offset(0, 4),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [primaryColor, accentColor],
         ),
-      ],
-      ),
-      child: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-        width: double.infinity,
-        alignment: Alignment.center,
-        padding: EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
             offset: Offset(0, 4),
           ),
-          ],
-        ),
-        child: Text(
-            'Suivez votre expédition en temps réel',
-            textAlign: TextAlign.center,
-          style: GoogleFonts.poppins(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-          shadows: [
-            Shadow(
-            color: Colors.black.withOpacity(0.3),
-            offset: Offset(1, 1),
-            blurRadius: 2,
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: double.infinity,
+            alignment: Alignment.center,
+            padding: EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
-          ],
+            child: Text(
+              'Suivez votre expédition en temps réel',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withOpacity(0.3),
+                    offset: Offset(1, 1),
+                    blurRadius: 2,
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-        ),
-        SizedBox(height: 24),
-        Text(
-        'Recevez des mises à jour instantanées sur votre envoi',
-        style: TextStyle(
-          color: Colors.white.withOpacity(0.8),
-          fontSize: 14,
-          fontStyle: FontStyle.normal,
-          shadows: [
-          Shadow(
-            color: Colors.black.withOpacity(0.2),
-            offset: Offset(1, 1),
-            blurRadius: 1,
+          SizedBox(height: 24),
+          Text(
+            'Recevez des mises à jour instantanées sur votre envoi',
+            style: GoogleFonts.poppins(
+              color: Colors.white.withOpacity(0.8),
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
           ),
-          ],
-        ),
-        textAlign: TextAlign.center,
-        ),
-      ],
+        ],
       ),
     );
   }
@@ -164,9 +151,7 @@ class _LogisticsScreenState extends State<LogisticsScreen> {
     return Card(
       margin: EdgeInsets.all(16),
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -175,11 +160,15 @@ class _LogisticsScreenState extends State<LogisticsScreen> {
               children: [
                 Icon(Icons.location_on, color: primaryColor),
                 SizedBox(width: 8),
-                Text(
-                  'Lagos, Nigeria → Accra, Ghana',
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                Expanded(
+                  child: Text(
+                    'Lagos, Nigeria → Accra, Ghana',
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: textColor,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -197,11 +186,14 @@ class _LogisticsScreenState extends State<LogisticsScreen> {
               children: [
                 Icon(Icons.inventory_2, color: Colors.grey[600]),
                 SizedBox(width: 8),
-                Text(
-                  'Textiles, 4 articles',
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontWeight: FontWeight.w500,
+                Expanded(
+                  child: Text(
+                    'Textiles, 4 articles',
+                    style: GoogleFonts.poppins(
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -222,7 +214,7 @@ class _LogisticsScreenState extends State<LogisticsScreen> {
             SizedBox(width: 4),
             Text(
               label,
-              style: TextStyle(
+              style: GoogleFonts.poppins(
                 color: Colors.grey[600],
                 fontSize: 12,
               ),
@@ -232,7 +224,7 @@ class _LogisticsScreenState extends State<LogisticsScreen> {
         SizedBox(height: 4),
         Text(
           value,
-          style: TextStyle(
+          style: GoogleFonts.poppins(
             fontWeight: FontWeight.w600,
             color: textColor,
           ),
@@ -244,7 +236,7 @@ class _LogisticsScreenState extends State<LogisticsScreen> {
   Widget _buildMap() {
     return Expanded(
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 16),
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
@@ -277,25 +269,18 @@ class _LogisticsScreenState extends State<LogisticsScreen> {
   Future<void> _onMapReady(bool isReady) async {
     if (isReady) {
       await controller.addMarker(
-        GeoPoint(latitude: 6.5244, longitude: 3.3792),
-        markerIcon: MarkerIcon(
-          icon: Icon(Icons.location_on, color: Colors.red, size: 48),
-        ),
+        GeoPoint(latitude: 6.5244, longitude: 3.3792), // Lagos
+        markerIcon: MarkerIcon(icon: Icon(Icons.location_on, color: Colors.red, size: 48)),
       );
       await controller.addMarker(
-        GeoPoint(latitude: 5.6037, longitude: -0.1870),
-        markerIcon: MarkerIcon(
-          icon: Icon(Icons.flag, color: Colors.green, size: 48),
-        ),
+        GeoPoint(latitude: 5.6037, longitude: -0.1870), // Accra
+        markerIcon: MarkerIcon(icon: Icon(Icons.flag, color: Colors.green, size: 48)),
       );
       await controller.drawRoad(
         GeoPoint(latitude: 6.5244, longitude: 3.3792),
         GeoPoint(latitude: 5.6037, longitude: -0.1870),
         roadType: RoadType.car,
-        roadOption: RoadOption(
-          roadColor: primaryColor,
-          roadWidth: 10,
-        ),
+        roadOption: RoadOption(roadColor: primaryColor, roadWidth: 10),
       );
     }
   }
@@ -304,9 +289,7 @@ class _LogisticsScreenState extends State<LogisticsScreen> {
     return Card(
       margin: EdgeInsets.all(16),
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {},
         borderRadius: BorderRadius.circular(12),
@@ -329,7 +312,7 @@ class _LogisticsScreenState extends State<LogisticsScreen> {
                     ),
                     Text(
                       'Regroupez vos envois pour réduire les coûts',
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         color: Colors.grey[600],
                         fontSize: 12,
                       ),
@@ -342,45 +325,6 @@ class _LogisticsScreenState extends State<LogisticsScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildBottomNavBar() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      selectedItemColor: primaryColor,
-      unselectedItemColor: Colors.grey[600],
-      currentIndex: 1,
-      elevation: 8,
-      items: [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
-        BottomNavigationBarItem(icon: Icon(Icons.local_shipping), label: 'Logistique'),
-        BottomNavigationBarItem(icon: Icon(Icons.payment), label: 'Paiements'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-      ],
-      onTap: (index) {
-        if (index == 0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomeScreen()),
-          );
-        }
-        else if (index == 2) {
-          // Navigate to Add screen
-          // Replace with your Add screen widget
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => PaymentsScreen()), // Replace with your Add screen
-          );
-        }
-         else if (index == 3) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => ProfileScreen()),
-          );
-        }
-      },
     );
   }
 }

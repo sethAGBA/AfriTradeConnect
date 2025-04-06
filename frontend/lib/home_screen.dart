@@ -3,9 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'profile_screen.dart';
-import 'logistics_screen.dart';
-import 'payments_screen.dart';
 import './widgets/config.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -38,10 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadData() async {
     setState(() => isLoading = true);
     try {
-      await Future.wait([
-        fetchProducts(),
-        fetchTrends(),
-      ]);
+      await Future.wait([fetchProducts(), fetchTrends()]);
       setState(() => errorMessage = null);
     } catch (e) {
       setState(() => errorMessage = e.toString());
@@ -56,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
       Uri.parse(Config.productsUrl),
       headers: Config.authHeaders,
     );
-    
     if (response.statusCode == 200) {
       setState(() => products = jsonDecode(response.body));
     } else if (response.statusCode == 401) {
@@ -73,7 +66,6 @@ class _HomeScreenState extends State<HomeScreen> {
       Uri.parse(Config.trendsUrl),
       headers: Config.authHeaders,
     );
-    
     if (response.statusCode == 200) {
       setState(() => trends = jsonDecode(response.body));
     } else {
@@ -87,7 +79,6 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: backgroundColor,
       appBar: _buildAppBar(),
       body: _buildBody(),
-      bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
@@ -117,9 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildBody() {
     if (isLoading) {
-      return Center(
-        child: CircularProgressIndicator(color: primaryColor),
-      );
+      return Center(child: CircularProgressIndicator(color: primaryColor));
     }
 
     if (errorMessage != null) {
@@ -152,34 +141,47 @@ class _HomeScreenState extends State<HomeScreen> {
       color: primaryColor,
       onRefresh: _loadData,
       child: SingleChildScrollView(
-      physics: AlwaysScrollableScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-        Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [primaryColor, accentColor],
-          ),
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(24),
-            bottomRight: Radius.circular(24),
-          ),
-          boxShadow: [
-            BoxShadow(
+        physics: AlwaysScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            SizedBox(height: 16),
+            _buildFilters(),
+            _buildTrendsSection(),
+            _buildProductsSection(),
+            SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [primaryColor, accentColor],
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        boxShadow: [
+          BoxShadow(
             color: Colors.black.withOpacity(0.2),
             blurRadius: 10,
             offset: Offset(0, 4),
-            ),
-          ],
           ),
-          child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
             width: double.infinity,
             alignment: Alignment.center,
             padding: EdgeInsets.symmetric(vertical: 16),
@@ -187,73 +189,62 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
               ],
             ),
             child: Text(
               'AfriTrade Connect',
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: [
-                Shadow(
-                color: Colors.black.withOpacity(0.3),
-                offset: Offset(1, 1),
-                blurRadius: 2,
-                ),
-              ],
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withOpacity(0.3),
+                    offset: Offset(1, 1),
+                    blurRadius: 2,
+                  ),
+                ],
               ),
             ),
-            ),
-            SizedBox(height: 16),
-            Container(
+          ),
+          SizedBox(height: 16),
+          Container(
             padding: EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
               ],
             ),
             child: Row(
               children: [
-              Icon(Icons.search, color: Colors.white),
-              SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                style: TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: 'Rechercher...',
-                  hintStyle: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
+                Icon(Icons.search, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Rechercher...',
+                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.8)),
+                      border: InputBorder.none,
+                    ),
                   ),
-                  border: InputBorder.none,
                 ),
-                ),
-              ),
               ],
             ),
-            ),
-          ],
           ),
-        ),
-        SizedBox(height: 16),
-        _buildFilters(),
-        _buildTrendsSection(),
-        _buildProductsSection(),
-        SizedBox(height: 24), // Espace en bas pour le scroll
         ],
-      ),
       ),
     );
   }
@@ -388,6 +379,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontWeight: FontWeight.bold,
                   color: textColor,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
               SizedBox(height: 8),
               Text(
@@ -404,15 +396,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
                   minimumSize: Size(double.infinity, 36),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
                 child: Text(
                   'Vendre maintenant',
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -526,41 +514,11 @@ class _HomeScreenState extends State<HomeScreen> {
             value: value,
             isExpanded: true,
             underline: SizedBox(),
-            items: items.map((item) => DropdownMenuItem(
-              value: item,
-              child: Text(item),
-            )).toList(),
+            items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
             onChanged: onChanged,
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildBottomNavBar() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      selectedItemColor: primaryColor,
-      unselectedItemColor: Colors.grey[600],
-      showUnselectedLabels: true,
-      currentIndex: 0,
-      elevation: 8,
-      items: [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
-        BottomNavigationBarItem(icon: Icon(Icons.local_shipping), label: 'Logistique'),
-        BottomNavigationBarItem(icon: Icon(Icons.payment), label: 'Paiements'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-      ],
-      onTap: (index) {
-        if (index == 1) {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => LogisticsScreen()));
-        } else if (index == 2) {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentsScreen()));
-        } else if (index == 3) {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen()));
-        }
-      },
     );
   }
 }

@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/home_screen.dart';
-import 'package:frontend/logistics_screen.dart';
-import 'package:frontend/payments_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -19,11 +16,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final Color textColor = Color(0xFF2C3E50);
   final Color backgroundColor = Color(0xFFF5F9FF);
   final Color successColor = Color(0xFF4CAF50);
+  final Color errorColor = Color(0xFFE57373);
 
   String? userName;
   String? userEmail;
   Map<String, dynamic>? userData;
-bool isLoading = true;
+  bool isLoading = true;
+  String? errorMessage;
+
   @override
   void initState() {
     super.initState();
@@ -40,16 +40,46 @@ bool isLoading = true;
   }
 
   Future<void> fetchUserProfile() async {
-    await Config.loadToken();
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userId');
-    final response = await http.get(
-      Uri.parse('${Config.usersUrl}/$userId'),
-      headers: Config.authHeaders,
-    );
-    if (response.statusCode == 200) {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+    try {
+      await Config.loadToken();
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('userId');
+      if (userId == null) {
+        throw Exception('Utilisateur non authentifié');
+      }
+      final response = await http.get(
+        Uri.parse('${Config.usersUrl}/$userId'),
+        headers: Config.authHeaders,
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          userData = jsonDecode(response.body);
+          if (userData?['name'] != userName) {
+            prefs.setString('userName', userData!['name']);
+            userName = userData!['name'];
+          }
+          if (userData?['email'] != userEmail) {
+            prefs.setString('userEmail', userData!['email']);
+            userEmail = userData!['email'];
+          }
+        });
+      } else if (response.statusCode == 401) {
+        await Config.removeToken();
+        Navigator.pushReplacementNamed(context, '/login');
+      } else {
+        throw Exception('Échec du chargement du profil: ${response.statusCode}');
+      }
+    } catch (e) {
       setState(() {
-        userData = jsonDecode(response.body);
+        errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
       });
     }
   }
@@ -57,66 +87,140 @@ bool isLoading = true;
   Future<void> _logout() async {
     await Config.removeToken();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('userId');
-    await prefs.remove('userName');
-    await prefs.remove('userEmail');
+    await prefs.clear();
     Navigator.pushReplacementNamed(context, '/login');
+  }
+
+  // Méthode pour afficher la boîte de dialogue de confirmation
+  Future<void> _showLogoutConfirmationDialog() async {
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Déconnexion',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+          ),
+          content: Text(
+            'Êtes-vous sûr de vouloir vous déconnecter ?',
+            style: GoogleFonts.poppins(color: textColor),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false), // Annuler
+              child: Text(
+                'Annuler',
+                style: GoogleFonts.poppins(color: primaryColor),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true), // Confirmer
+              child: Text(
+                'Oui',
+                style: GoogleFonts.poppins(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      _logout();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: Text(
-          'Mon Profil',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+      appBar: _buildAppBar(),
+      body: _buildBody(),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: Text(
+        'Mon Profil',
+        style: GoogleFonts.poppins(
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
         ),
-        backgroundColor: primaryColor,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.edit , color: Colors.white),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.settings, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
       ),
-      body: SingleChildScrollView(
+      backgroundColor: primaryColor,
+      elevation: 0,
+      actions: [
+        IconButton(
+          icon: Icon(Icons.logout, color: Colors.white),
+          tooltip: 'Déconnexion',
+          onPressed: _showLogoutConfirmationDialog, // Appel de la boîte de dialogue
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBody() {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator(color: primaryColor));
+    }
+
+    if (errorMessage != null) {
+      return Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildProfileHeader(),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  _buildInfoCard(),
-                  SizedBox(height: 16),
-                  _buildStatsCard(),
-                  SizedBox(height: 16),
-                  _buildActionsCard(),
-                  SizedBox(height: 24),
-                  _buildLogoutButton(),
-                ],
+            Icon(Icons.error_outline, size: 48, color: errorColor),
+            SizedBox(height: 16),
+            Text(
+              errorMessage!,
+              style: GoogleFonts.poppins(color: errorColor),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: fetchUserProfile,
+              child: Text('Réessayer'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
             ),
           ],
         ),
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _buildProfileHeader(),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                _buildInfoCard(),
+                SizedBox(height: 16),
+                _buildStatsCard(),
+                SizedBox(height: 16),
+                _buildActionsCard(),
+                SizedBox(height: 24),
+                _buildLogoutButton(),
+              ],
+            ),
+          ),
+        ],
       ),
-      bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
-    Widget _buildProfileHeader() {
+  Widget _buildProfileHeader() {
     return Container(
-      width: double.infinity,  // Occupe toute la largeur
-      height: 300,  // Hauteur fixe plus importante
+      width: double.infinity,
+      height: 300,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -136,10 +240,10 @@ bool isLoading = true;
         ],
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,  // Centre verticalement
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircleAvatar(
-            radius: 60,  // Augmentation de la taille
+            radius: 60,
             backgroundColor: Colors.white,
             child: Icon(Icons.person, size: 60, color: primaryColor),
           ),
@@ -147,7 +251,7 @@ bool isLoading = true;
           Text(
             userName ?? 'Chargement...',
             style: GoogleFonts.poppins(
-              fontSize: 28,  // Taille de police plus grande
+              fontSize: 28,
               fontWeight: FontWeight.bold,
               color: Colors.white,
               letterSpacing: 0.5,
@@ -156,7 +260,7 @@ bool isLoading = true;
           SizedBox(height: 8),
           Text(
             userEmail ?? '',
-            style: TextStyle(
+            style: GoogleFonts.poppins(
               color: Colors.white.withOpacity(0.9),
               fontSize: 18,
               letterSpacing: 0.3,
@@ -170,8 +274,8 @@ bool isLoading = true;
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              userData?['companyType'] ?? 'chargement...',
-              style: TextStyle(
+              userData?['companyType'] ?? 'Chargement...',
+              style: GoogleFonts.poppins(
                 color: Colors.white,
                 fontWeight: FontWeight.w500,
               ),
@@ -200,11 +304,9 @@ bool isLoading = true;
               ),
             ),
             SizedBox(height: 16),
-            _buildInfoRow(Icons.business, 'Type d\'entreprise', 
-              userData?['companyType'] ?? 'Chargement...'),
+            _buildInfoRow(Icons.business, 'Type d\'entreprise', userData?['companyType'] ?? 'Chargement...'),
             Divider(height: 24),
-            _buildInfoRow(Icons.stars, 'Score de crédit', 
-              '${userData?['creditScore'] ?? 'N/A'}/1000'),
+            _buildInfoRow(Icons.stars, 'Score de crédit', '${userData?['creditScore'] ?? 'N/A'}/1000'),
           ],
         ),
       ),
@@ -222,7 +324,7 @@ bool isLoading = true;
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: GoogleFonts.poppins(
                   color: Colors.grey[600],
                   fontSize: 14,
                 ),
@@ -230,7 +332,7 @@ bool isLoading = true;
               SizedBox(height: 4),
               Text(
                 value,
-                style: TextStyle(
+                style: GoogleFonts.poppins(
                   fontWeight: FontWeight.w600,
                   color: textColor,
                   fontSize: 16,
@@ -283,7 +385,7 @@ bool isLoading = true;
         ),
         Text(
           label,
-          style: TextStyle(
+          style: GoogleFonts.poppins(
             color: Colors.grey[600],
             fontSize: 12,
           ),
@@ -298,11 +400,32 @@ bool isLoading = true;
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Column(
         children: [
-          _buildActionTile('Mes documents', Icons.folder, () {}),
+          _buildActionTile('Mes documents', Icons.folder, () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Fonctionnalité à venir : Mes documents'),
+                backgroundColor: primaryColor,
+              ),
+            );
+          }),
           Divider(height: 1),
-          _buildActionTile('Préférences de paiement', Icons.payment, () {}),
+          _buildActionTile('Préférences de paiement', Icons.payment, () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Fonctionnalité à venir : Préférences de paiement'),
+                backgroundColor: primaryColor,
+              ),
+            );
+          }),
           Divider(height: 1),
-          _buildActionTile('Sécurité', Icons.security, () {}),
+          _buildActionTile('Sécurité', Icons.security, () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Fonctionnalité à venir : Sécurité'),
+                backgroundColor: primaryColor,
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -320,7 +443,7 @@ bool isLoading = true;
       ),
       title: Text(
         title,
-        style: TextStyle(
+        style: GoogleFonts.poppins(
           fontWeight: FontWeight.w600,
           color: textColor,
         ),
@@ -332,7 +455,7 @@ bool isLoading = true;
 
   Widget _buildLogoutButton() {
     return ElevatedButton.icon(
-      onPressed: _logout,
+      onPressed: _showLogoutConfirmationDialog, // Appel de la boîte de dialogue ici aussi
       icon: Icon(Icons.logout),
       label: Text('Déconnexion'),
       style: ElevatedButton.styleFrom(
@@ -340,45 +463,8 @@ bool isLoading = true;
         foregroundColor: Colors.white,
         padding: EdgeInsets.symmetric(vertical: 16),
         minimumSize: Size(double.infinity, 50),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-    );
-  }
-
-  Widget _buildBottomNavBar() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      selectedItemColor: primaryColor,
-      unselectedItemColor: Colors.grey[600],
-      currentIndex: 3,
-      elevation: 8,
-      items: [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
-        BottomNavigationBarItem(icon: Icon(Icons.local_shipping), label: 'Logistique'),
-        BottomNavigationBarItem(icon: Icon(Icons.payment), label: 'Paiements'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-      ],
-      onTap: (index) {
-        if (index == 0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomeScreen()),
-          );
-        } else if (index == 1) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => LogisticsScreen()),
-          );
-        } else if (index == 2) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => PaymentsScreen()),
-          );
-        }
-      },
     );
   }
 }
